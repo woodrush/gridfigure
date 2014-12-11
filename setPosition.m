@@ -55,7 +55,7 @@ function setPosition(varargin)
     %======================================================================
     if ~isnumeric(args{1})
         for ind = [1 3]
-            try 
+            try
                 if strcmp(args{ind}, 'figsize')
                     figsize = args{ind+1};
                 elseif strcmp(args{ind}, 'orientation')
@@ -105,7 +105,7 @@ function setPosition(varargin)
             row = mod(numPos - 1, rowMax);
             % column (counting from 0)
             col = ceil(numPos / rowMax);
-            if orientation
+            if orientation == 'row'
                 % Organize from left to right
                 % column (counting from 1)
                 col = mod(numPos - 1, colMax) + 1;
