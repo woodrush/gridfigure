@@ -24,7 +24,7 @@ function setPosition(varargin)
     % Default figure size
     defaultFigsize = [400, 300];
     % default orientation (true: left to right, false: up to down) 
-    defaultOrientation = false;
+    defaultOrientation = 'row'; % 'col';
     % Order of displays to show figures on
     % The main display is index no. 1, and the subdisplays are indices no. 2, 3, ...
     useDispNoArray = [2 1 3:10];
@@ -32,17 +32,15 @@ function setPosition(varargin)
     marginLeft = 16;
     % Top Margin
     marginTop = 95;
-
     %======================================================================
     % Internal States
     %======================================================================
     persistent figsize
     persistent orientation
-
-    if numel(figsize) < 2
+    if isempty(figsize)
         figsize = defaultFigsize;
     end
-    if ~islogical(orientation)
+    if isempty(orientation)
         orientation = defaultOrientation;
     end
 
@@ -56,13 +54,14 @@ function setPosition(varargin)
     if ~isnumeric(args{1})
         for ind = [1 3]
             try
-                if strcmp(args{ind}, 'figsize')
-                    figsize = args{ind+1};
-                elseif strcmp(args{ind}, 'orientation')
-                    orientation = args{ind+1};
-                end
-            end
-        end
+	        	switch args{ind}
+		        	case 'figsize'
+		        		figsize = args{ind+1};
+		        	case 'orientation'
+		        		orientation = args{ind+1};
+	        	end
+	        end
+	    end
     %======================================================================
     % Case: When called for figure positioning
     %======================================================================
@@ -105,7 +104,7 @@ function setPosition(varargin)
             row = mod(numPos - 1, rowMax);
             % column (counting from 0)
             col = ceil(numPos / rowMax);
-            if orientation == 'row'
+            if strcmp(orientation,'col')
                 % Organize from left to right
                 % column (counting from 1)
                 col = mod(numPos - 1, colMax) + 1;

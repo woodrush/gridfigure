@@ -1,12 +1,20 @@
 function ret = gfigure(varargin)
 	args = parseInputs(varargin);
-	if
-	% isfield(args, 'fighandles')
-	% isfield(args, 'figsize')
-	% isfield(args, 'orientation')
+	if isfield(args,'figsize')
+		setPosition('figsize',args.figsize);
+	end
+	if isfield(args,'orientation')
+		setPosition('orientation',args.orientation);
+	end
+	if isfield(args,'fighandles')
+		for ind = 1:length(args.fighandles)
+			figure(args.fighandles(ind));
+			setPosition(ind,args.fighandles(ind));
+		end
+	end
 end
 function args = parseInputs(inArgs)
-	args = struct('fighandles',0);
+	args = struct('fighandles',sort(get(0, 'Children')));
 	ind = 1;
 	while ind <= length(inArgs)
 		% If argument is not a numeric
@@ -31,7 +39,7 @@ function args = parseInputs(inArgs)
 			args.figsize = [evalNumericArg(inArgs{ind}), evalNumericArg(inArgs{ind+1})];
 			ind = ind + 1;
 		% If argument is numeric
-		elseif isNumericArg(inArgs{ind})
+		elseif isNumericArg(inArgs{ind}) && ~isempty(evalNumericArg(inArgs{ind}))
 			args.fighandles = evalNumericArg(inArgs{ind});
 		end
 		ind = ind + 1;
