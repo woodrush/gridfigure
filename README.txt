@@ -46,13 +46,14 @@ Default figure size, subdisplay priority, oriantation could be changed by editin
 
 ----
 ### Authors
+gridfigure
 Copyright 2014, Hikaru Ikuta.
 Distributed under the BSD License.
 
 Multidisplay compatibility code is from myfigure:
 Copyright 2014, Takashi Sugimoto.
 
-Screenshot figures
+Screenshot figures:
 Figure 1: http://www.mathworks.com/matlabcentral/fileexchange/35292-matlab-plot-gallery-graph-plot/content/html/Graph_Plot.html
 Figure 2: http://www.mathworks.com/matlabcentral/fileexchange/35311-matlab-plot-gallery-surface-contour-plot/content/html/Surface_Contour_Plot.html
 Figure 3: http://www.mathworks.com/matlabcentral/fileexchange/35282-matlab-plot-gallery-contour-plot/content/html/Contour_Plot.html
