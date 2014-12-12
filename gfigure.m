@@ -8,8 +8,8 @@ function ret = gfigure(varargin)
 	%     gfigure               ->  Align all visible figures in grid style
 	%     gfigure 1:5           ->  Align specified figures in grid style
 	%     gfigure 400 300       ->  Resize figure to 400x300 and align (setting is remembered)
-	%     gfigure row           ->  (-r) Align row-wise ('col' or '-s' for column-wise. setting is remembered)
 	%     gfigure disp 2        ->  (-d) Show on second display (setting is remembered)
+	%     gfigure row           ->  (-r) Align row-wise ('col' or '-s' for column-wise. setting is remembered)
 	%     gfigure nofocus       ->  (-n) Don't give focus and only align
 	%     gfigure tail          ->  (-t) Move figures to end
 	%     gfigure size 400 300  ->  (-s) Explicitly specify figure size
