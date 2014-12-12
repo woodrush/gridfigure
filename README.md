@@ -8,6 +8,7 @@ gridfigure is...
 gridfigure supports multiscreens. You can specify which screen to show figure windows on.
 Automatic alignment requires some additional settings (see "Automatic Alignment" section)
 
+![gfigure example](./screenshot.png) 
 
 ### Examples:
     gfigure               ->  Align all visible figures in grid style
@@ -19,6 +20,7 @@ Automatic alignment requires some additional settings (see "Automatic Alignment"
     gfigure tail          ->  (-t) Move figures to end
     gfigure size 400 300  ->  (-s) Explicitly specify figure size
 Composite Calls are possible:
+
     gfigure 400 300 row 1:5 disp 2
     gfigure 1 400 300 row           ->  Ambiguous call. gfigure guesses min(1,300) is the figure handle
     gfigure('disp',[3 1 2],400,300,[1 3 5 7 9])
@@ -55,13 +57,14 @@ Multidisplay compatibility code is from myfigure:
 Copyright 2014, Takashi Sugimoto.
 
 Screenshot figures:
-Figure 1: http://www.mathworks.com/matlabcentral/fileexchange/35292-matlab-plot-gallery-graph-plot/content/html/Graph_Plot.html
-Figure 2: http://www.mathworks.com/matlabcentral/fileexchange/35311-matlab-plot-gallery-surface-contour-plot/content/html/Surface_Contour_Plot.html
-Figure 3: http://www.mathworks.com/matlabcentral/fileexchange/35282-matlab-plot-gallery-contour-plot/content/html/Contour_Plot.html
-Figure 4: http://www.mathworks.com/matlabcentral/fileexchange/35245-matlab-plot-gallery-plot-in-plot/content/html/Plot_in_Plot.html
-Figure 5: http://www.mathworks.com/matlabcentral/fileexchange/35265-matlab-plot-gallery-log-log-plot/content/html/Loglog_Plot.html
-Figure 6: http://www.mathworks.com/matlabcentral/fileexchange/35248-matlab-plot-gallery-streamline/content/html/Streamline.html
-Figure 7: http://www.mathworks.com/matlabcentral/fileexchange/35237-matlab-plot-gallery-adding-latex-to-plots/content/html/Add_Latex_to_Plot.html
-Desktop Image: Seascape after sunset
-11.24.2007, Rnbc, http://en.wikipedia.org/wiki/User:Rnbc
-http://commons.wikimedia.org/wiki/File:Seascape_after_sunset.jpg
+
+- Figure 1: http://www.mathworks.com/matlabcentral/fileexchange/35292-matlab-plot-gallery-graph-plot/content/html/Graph_Plot.html
+- Figure 2: http://www.mathworks.com/matlabcentral/fileexchange/35311-matlab-plot-gallery-surface-contour-plot/content/html/Surface_Contour_Plot.html
+- Figure 3: http://www.mathworks.com/matlabcentral/fileexchange/35282-matlab-plot-gallery-contour-plot/content/html/Contour_Plot.html
+- Figure 4: http://www.mathworks.com/matlabcentral/fileexchange/35245-matlab-plot-gallery-plot-in-plot/content/html/Plot_in_Plot.html
+- Figure 5: http://www.mathworks.com/matlabcentral/fileexchange/35265-matlab-plot-gallery-log-log-plot/content/html/Loglog_Plot.html
+- Figure 6: http://www.mathworks.com/matlabcentral/fileexchange/35248-matlab-plot-gallery-streamline/content/html/Streamline.html
+- Figure 7: http://www.mathworks.com/matlabcentral/fileexchange/35237-matlab-plot-gallery-adding-latex-to-plots/content/html/Add_Latex_to_Plot.html
+- Desktop Image: Seascape after sunset
+  11.24.2007, Rnbc, http://en.wikipedia.org/wiki/User:Rnbc
+  http://commons.wikimedia.org/wiki/File:Seascape_after_sunset.jpg
