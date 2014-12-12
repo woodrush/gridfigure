@@ -1,4 +1,4 @@
-% set(0,'defaultfigurecreatefcn',@(varargin) gfigure('atend',varargin{1}));
+% set(0,'defaultfigurecreatefcn',@(varargin) gfigure('tail','nofocus',varargin{1}));
 function ret = gfigure(varargin)
     %======================================================================
     % Settings
@@ -17,18 +17,19 @@ function ret = gfigure(varargin)
     %======================================================================
     persistent figsize
     persistent orientation
-    persistent dispPriority
+    persistent dispPrioritySettings
     if isempty(figsize)
         figsize = defaultFigsize;
     end
     if isempty(orientation)
         orientation = defaultOrientation;
     end
-    if isempty(dispPriority)
-        dispPriority = defaultDispPriority;
+    if isempty(dispPrioritySettings)
+        dispPrioritySettings = defaultDispPriority;
     end
     %======================================================================
-	args = parseInputs(varargin);
+    defaultArgs = struct('fighandles',sort(get(0, 'Children')));
+	args = parseInputs(defaultArgs,varargin);
 	if isfield(args,'figsize')
 		figsize = args.figsize;
 	end
@@ -36,79 +37,76 @@ function ret = gfigure(varargin)
 		orientation = args.orientation;
 	end
 	if isfield(args,'dispPriority')
-	    dispPriority = args.dispPriority;
+	    dispPrioritySettings = args.dispPriority;
 	end
-    dispArray = 1:size(get(0,'MonitorPosition'),1);
-    for dp = dispPriority
-    	if dp <= max(dispArray)
-    		dispArray(find(dispArray == dp)) = [];
-    	else
-    		dispPriority(find(dispPriority == dp)) = [];
-    	end
-    end
-    dispPriority = [dispPriority dispArray];
-    dispInfo = get(0,'MonitorPosition');
-    dispInfo = dispInfo(dispPriority,:)';
-    % dispInds = zeros(2,length(dispPriority));
-    % for ind = 1:size(2,dispInfo)
-    % 	screenSize = dispInfo(:,ind)
-    %     screenWidth = screenSize(3) - screenSize(1);
-    %     screenHeight = screenSize(4) - screenSize(2);
-    %     hLength = marginLeft + figureWidth;
-    %     vLength = marginTop + figureHeight;
-    %     rowMax = floor(screenWidth / hLength);
-    %     colMax = floor(screenHeight / vLength);
-    %     dispInds(:,ind) = [rowMax, colMax];
-    % end
-
+    % Alignment
 	if isfield(args,'fighandles')
+		% Determining subdisplay priority settings
+	    dispInfo = get(0,'MonitorPosition');
+	    dispPriority = 1:size(dispInfo,1);
+	    for dp = dispPrioritySettings
+	    	if dp <= max(dispPriority)
+	    		dispPriority(find(dispPriority == dp)) = [];
+	    	else
+	    		dispPrioritySettings(find(dispPrioritySettings == dp)) = [];
+	    	end
+	    end
+	    dispPriority = [dispPrioritySettings dispPriority];
+	    dispInfo = dispInfo(dispPriority,:)';
+	    dispInds = zeros(3,length(dispPriority));
+	    for ind = 1:size(dispInfo,2)
+	    	screenSize = dispInfo(:,ind);
+	        screenWidth = screenSize(3) - screenSize(1);
+	        screenHeight = screenSize(4) - screenSize(2);
+	        hLength = marginLeft + figsize(1);
+	        vLength = marginTop + figsize(2);
+	        rowMax = floor(screenWidth / hLength);
+	        colMax = floor(screenHeight / vLength);
+	        dispInds(:,ind) = [rowMax; colMax; rowMax*colMax];
+	    end
+	    mainscreenSize = get(0,'screenSize');
 		for ind = 1:length(args.fighandles)
-			figure(args.fighandles(ind));
-			numPos = ind;
-			if isfield(args,'atend')
-				numPos = numPos + length(get(0,'Children')) - 1;
-			end
-			figure(args.fighandles(ind));
-			numPos = ind;
-			if isfield(args,'atend')
-				numPos = numPos + length(get(0,'Children')) - 1;
-			end
-			figNum = args.fighandles(ind);
-		    figureWidth = figsize(1);
-		    figureHeight = figsize(2);
-		    mainscreenSize = get(0,'screenSize');
-		    for screenSize = dispInfo
-		        screenWidth = screenSize(3) - screenSize(1);
-		        screenHeight = screenSize(4) - screenSize(2);
-		        hLength = marginLeft + figureWidth;
-		        vLength = marginTop + figureHeight;
-		        rowMax = floor(screenWidth / hLength);
-		        colMax = floor(screenHeight / vLength);
-		        if numPos > rowMax * colMax
-		            numPos = numPos - rowMax * colMax;
-		            pos = get(figNum, 'Position');
-		            set(figNum,'Position',[pos(1), pos(2) + pos(4) - figureHeight, figureWidth, figureHeight]);
-		        else
-			        row = mod(numPos - 1, rowMax);
-			        col = ceil(numPos / rowMax);
-			        if strcmp(orientation,'col')
-			            col = mod(numPos - 1, colMax) + 1;
-			            row = ceil(numPos / colMax) - 1;
-			        else
-			            row = mod(numPos - 1, rowMax);
-			            col = ceil(numPos / rowMax);
-			        end
-			        left = screenSize(1) + marginLeft + hLength * row;
-			        bottom = mainscreenSize(4) - screenSize(2) - vLength * col;
-			        set(figNum,'Position',[left, bottom, figureWidth, figureHeight]);
-			        break
-			    end
+			if ~isfield(args,'nofocus')
+				figure(args.fighandles(ind));
+			else
+				currentFigures = get(0,'Children');
+				if isempty(find(currentFigures == args.fighandles(ind)))
+		            warning('gfigure:warning', ['Figure ' str2double(args.fighandles(ind)) ' does not exist']);
+		            continue
+		        end
 		    end
+			if isfield(args,'tail')
+				cumulativeIndex = ind + length(get(0,'Children')) - 1;
+			else
+				cumulativeIndex = ind;
+			end
+			figNum = args.fighandles(ind);			
+		    for targetDispIndex = 1:size(dispInfo,2)
+		    	if cumulativeIndex <= sum(dispInds(3,1:targetDispIndex))
+		    		break;
+		    	end
+		    end
+		    numPos = cumulativeIndex - sum(dispInds(3,1:(targetDispIndex-1)));
+		    numPos = min(numPos, dispInds(3,targetDispIndex));
+		    % Determime display to show on
+	    	screenSize = dispInfo(:,targetDispIndex);
+	    	rowMax = dispInds(1,targetDispIndex);
+	    	colMax = dispInds(2,targetDispIndex);
+	        if strcmp(orientation,'col')
+	            col = mod(numPos - 1, colMax) + 1;
+	            row = ceil(numPos / colMax) - 1;
+	        else
+	            row = mod(numPos - 1, rowMax);
+	            col = ceil(numPos / rowMax);
+	        end
+	        left = screenSize(1) + marginLeft + hLength * row;
+	        bottom = mainscreenSize(4) - screenSize(2) - vLength * col;
+	        set(figNum,'Position',[left, bottom, figsize(1), figsize(2)]);
 		end
 	end
 end
-function args = parseInputs(inArgs)
-	args = struct('fighandles',sort(get(0, 'Children')));
+function args = parseInputs(defaultArgs,inArgs)
+	args = defaultArgs;
 	ind = 1;
 	while ind <= length(inArgs)
 		% If 3 consecutive arguments (starting from current) are numerics of length 1
@@ -130,16 +128,24 @@ function args = parseInputs(inArgs)
 		% If argument is not a numeric
 		elseif ~isNumericArg(inArgs{ind})
 			switch lower(inArgs{ind})
-				case 'row'
+				case {'row','-r'}
 					args.orientation = 'row';
-				case 'col'
+				case {'col','-c'}
 					args.orientation = 'col';
-				case 'atend'
-					args.atend = true;
-				case 'disp'
+				case {'tail','-t'}
+					args.tail = true;
+				case {'nofocus','-n'}
+					args.nofocus = true;
+				case {'disp','-d'}
 					if (length(inArgs) - ind) >= 1 && isNumericArg(inArgs{ind+1})
 						args.dispPriority = evalNumericArg(inArgs{ind+1});
 						ind = ind + 1;
+					end
+				case {'size','-s'}
+					if (length(inArgs) - ind) >= 2 && isNumericArg(inArgs{ind+1}) && isNumericArg(inArgs{ind+2}) ...
+			           && isscalar(evalNumericArg(inArgs{ind+1})) && isscalar(evalNumericArg(inArgs{ind+2}))
+						args.figsize = [evalNumericArg(inArgs{ind+1}), evalNumericArg(inArgs{ind+2})];
+						ind = ind + 2;
 					end
 			end
 		end
