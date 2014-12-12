@@ -18,9 +18,6 @@ function ret = gfigure(varargin)
 	%     gfigure 1 400 300 row           ->  Ambiguous call. gfigure guesses min(1,300) is the figure handle
 	%     gfigure('disp',[3 1 2],400,300,[1 3 5 7 9])
     % 
-	% ### Default Settings
-	% Default figure size, subdisplay priority, oriantation could be changed by editing variables in gfigure.m ('edit gfigure.m').
-    % 
 	% ### Automatic Alignment
 	% By executing the code below, you can let figure windows automatically appear in grid style without any commands:
 	%     set(0,'defaultfigurecreatefcn',@(varargin) gfigure('tail','nofocus',varargin{1}));
@@ -35,29 +32,24 @@ function ret = gfigure(varargin)
     %======================================================================
     % Settings
     %======================================================================
-    % Default figure size
-    defaultFigsize = [400, 300];
-    % default orientation (true: left to right, false: up to down) 
-    defaultOrientation = 'row'; % 'col';
-    % Order of displays to show figures on
-    % The main display is index no. 1, and the subdisplays are indices no. 2, 3, ...
-    defaultDispPriority = [2 1 3:10];
-    % Left Margin
-    marginLeft = 16;
-    % Top Margin
-    marginTop = 95;
+    defaultFigsize = [400, 300];  % Default figure size
+    defaultOrientation = 'row';   % default orientation ('row': left to right, 'col': up to down)
+    defaultDispPriority = [2 1];  % Order of displays to show figures on
+                                  % The main display is index no. 1, and the subdisplays are indices no. 2, 3, ...    
+    marginLeft = 16;              % Left Margin
+    marginTop = 95;               % Top Margin
     %======================================================================
     persistent figsize
     persistent orientation
-    persistent dispPrioritySettings
+    persistent dispPriority
     if isempty(figsize)
         figsize = defaultFigsize;
     end
     if isempty(orientation)
         orientation = defaultOrientation;
     end
-    if isempty(dispPrioritySettings)
-        dispPrioritySettings = defaultDispPriority;
+    if isempty(dispPriority)
+        dispPriority = defaultDispPriority;
     end
     %======================================================================
     defaultArgs = struct('fighandles',sort(get(0, 'Children')));
@@ -69,32 +61,28 @@ function ret = gfigure(varargin)
 		orientation = args.orientation;
 	end
 	if isfield(args,'dispPriority')
-	    dispPrioritySettings = args.dispPriority;
+	    dispPriority = args.dispPriority;
 	end
     % Alignment
 	if isfield(args,'fighandles')
 		% Determining subdisplay priority settings
-	    dispInfo = get(0,'MonitorPosition');
-	    dispPriority = 1:size(dispInfo,1);
-	    for dp = dispPrioritySettings
-	    	if dp <= max(dispPriority)
-	    		dispPriority(find(dispPriority == dp)) = [];
+	    dispCoords = get(0,'MonitorPosition');
+	    dispArray = 1:size(dispCoords,1);
+	    for dp = dispPriority
+	    	if dp <= max(dispArray)
+	    		dispArray(find(dispArray == dp)) = [];
 	    	else
-	    		dispPrioritySettings(find(dispPrioritySettings == dp)) = [];
+	    		dispPriority(find(dispPriority == dp)) = [];
 	    	end
 	    end
-	    dispPriority = [dispPrioritySettings dispPriority];
-	    dispInfo = dispInfo(dispPriority,:)';
-	    dispInds = zeros(3,length(dispPriority));
-	    for ind = 1:size(dispInfo,2)
-	    	screenSize = dispInfo(:,ind);
-	        screenWidth = screenSize(3) - screenSize(1);
-	        screenHeight = screenSize(4) - screenSize(2);
-	        hLength = marginLeft + figsize(1);
-	        vLength = marginTop + figsize(2);
-	        rowMax = floor(screenWidth / hLength);
-	        colMax = floor(screenHeight / vLength);
-	        dispInds(:,ind) = [rowMax; colMax; rowMax*colMax];
+	    dispArray = [dispPriority dispArray];
+	    dispCoords = dispCoords(dispArray,:)';
+	    dispIndBounds = zeros(3,length(dispArray));
+	    for ind = 1:size(dispCoords,2)
+	    	screenSize = dispCoords(:,ind);
+	        rowMax = floor((screenSize(3) - screenSize(1)) / (marginLeft + figsize(1)));
+	        colMax = floor((screenSize(4) - screenSize(2)) / (marginTop + figsize(2)));
+	        dispIndBounds(:,ind) = [rowMax; colMax; rowMax*colMax];
 	    end
 	    mainscreenSize = get(0,'screenSize');
 		for ind = 1:length(args.fighandles)
@@ -113,26 +101,25 @@ function ret = gfigure(varargin)
 				cumulativeIndex = ind;
 			end
 			figNum = args.fighandles(ind);			
-		    for targetDispIndex = 1:size(dispInfo,2)
-		    	if cumulativeIndex <= sum(dispInds(3,1:targetDispIndex))
+		    for targetDisp = 1:size(dispCoords,2)
+		    	if cumulativeIndex <= sum(dispIndBounds(3,1:targetDisp))
 		    		break;
 		    	end
 		    end
-		    numPos = cumulativeIndex - sum(dispInds(3,1:(targetDispIndex-1)));
-		    numPos = min(numPos, dispInds(3,targetDispIndex));
+		    numPos = cumulativeIndex - sum(dispIndBounds(3,1:(targetDisp-1)));
+		    numPos = min(numPos, dispIndBounds(3,targetDisp));
 		    % Determime display to show on
-	    	screenSize = dispInfo(:,targetDispIndex);
-	    	rowMax = dispInds(1,targetDispIndex);
-	    	colMax = dispInds(2,targetDispIndex);
 	        if strcmp(orientation,'col')
-	            col = mod(numPos - 1, colMax) + 1;
-	            row = ceil(numPos / colMax) - 1;
+	            row = ceil(numPos / dispIndBounds(2,targetDisp)) - 1;
+	            col = mod(numPos - 1, dispIndBounds(2,targetDisp)) + 1;
 	        else
-	            row = mod(numPos - 1, rowMax);
-	            col = ceil(numPos / rowMax);
+	            row = mod(numPos - 1, dispIndBounds(1,targetDisp));
+	            col = ceil(numPos / dispIndBounds(1,targetDisp));
 	        end
-	        left = screenSize(1) + marginLeft + hLength * row;
-	        bottom = mainscreenSize(4) - screenSize(2) - vLength * col;
+	        hLength = marginLeft + figsize(1);
+	        vLength = marginTop + figsize(2);
+	        left = dispCoords(1,targetDisp) + marginLeft + hLength * row;
+	        bottom = mainscreenSize(4) - dispCoords(2,targetDisp) - vLength * col;
 	        set(figNum,'Position',[left, bottom, figsize(1), figsize(2)]);
 		end
 	end
