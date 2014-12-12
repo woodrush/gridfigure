@@ -9,7 +9,7 @@ function ret = gfigure(varargin)
     defaultOrientation = 'row'; % 'col';
     % Order of displays to show figures on
     % The main display is index no. 1, and the subdisplays are indices no. 2, 3, ...
-    defaultUseDispNoArray = [2 1 3:10];
+    defaultDispPriority = [2 1 3:10];
     % Left Margin
     marginLeft = 16;
     % Top Margin
@@ -17,12 +17,15 @@ function ret = gfigure(varargin)
     %======================================================================
     persistent figsize
     persistent orientation
-    persistent useDispNoArray
+    persistent dispPriority
     if isempty(figsize)
         figsize = defaultFigsize;
     end
     if isempty(orientation)
         orientation = defaultOrientation;
+    end
+    if isempty(dispPriority)
+        dispPriority = defaultDispPriority;
     end
     %======================================================================
 	args = parseInputs(varargin);
@@ -32,6 +35,32 @@ function ret = gfigure(varargin)
 	if isfield(args,'orientation')
 		orientation = args.orientation;
 	end
+	if isfield(args,'dispPriority')
+	    dispPriority = args.dispPriority;
+	end
+    dispArray = 1:size(get(0,'MonitorPosition'),1);
+    for dp = dispPriority
+    	if dp <= max(dispArray)
+    		dispArray(find(dispArray == dp)) = [];
+    	else
+    		dispPriority(find(dispPriority == dp)) = [];
+    	end
+    end
+    dispPriority = [dispPriority dispArray];
+    dispInfo = get(0,'MonitorPosition');
+    dispInfo = dispInfo(dispPriority,:)';
+    % dispInds = zeros(2,length(dispPriority));
+    % for ind = 1:size(2,dispInfo)
+    % 	screenSize = dispInfo(:,ind)
+    %     screenWidth = screenSize(3) - screenSize(1);
+    %     screenHeight = screenSize(4) - screenSize(2);
+    %     hLength = marginLeft + figureWidth;
+    %     vLength = marginTop + figureHeight;
+    %     rowMax = floor(screenWidth / hLength);
+    %     colMax = floor(screenHeight / vLength);
+    %     dispInds(:,ind) = [rowMax, colMax];
+    % end
+
 	if isfield(args,'fighandles')
 		for ind = 1:length(args.fighandles)
 			figure(args.fighandles(ind));
@@ -39,40 +68,42 @@ function ret = gfigure(varargin)
 			if isfield(args,'atend')
 				numPos = numPos + length(get(0,'Children')) - 1;
 			end
+			figure(args.fighandles(ind));
+			numPos = ind;
+			if isfield(args,'atend')
+				numPos = numPos + length(get(0,'Children')) - 1;
+			end
 			figNum = args.fighandles(ind);
-		    figure_width = figsize(1);
-		    figure_height = figsize(2);
-		    dispInfo = get(0,'MonitorPosition');
-		    dispNo = size(dispInfo, 1);
-		    useDispNoArray = useDispNoArray(useDispNoArray <= dispNo);
-		    dispInfo = dispInfo(useDispNoArray, :);
-		    mainScreenSize = get(0,'ScreenSize');
-		    for ScreenSize = dispInfo'
-		        screenWidth = ScreenSize(3) - ScreenSize(1);
-		        screenHeight = ScreenSize(4) - ScreenSize(2);
-		        hLength = marginLeft + figure_width;
-		        vLength = marginTop + figure_height;
+		    figureWidth = figsize(1);
+		    figureHeight = figsize(2);
+		    mainscreenSize = get(0,'screenSize');
+		    for screenSize = dispInfo
+		        screenWidth = screenSize(3) - screenSize(1);
+		        screenHeight = screenSize(4) - screenSize(2);
+		        hLength = marginLeft + figureWidth;
+		        vLength = marginTop + figureHeight;
 		        rowMax = floor(screenWidth / hLength);
 		        colMax = floor(screenHeight / vLength);
 		        if numPos > rowMax * colMax
 		            numPos = numPos - rowMax * colMax;
 		            pos = get(figNum, 'Position');
-		            set(figNum,'Position',[pos(1), pos(2) + pos(4) - figure_height, figure_width, figure_height]);
-		            continue
-		        end
-		        row = mod(numPos - 1, rowMax);
-		        col = ceil(numPos / rowMax);
-		        if strcmp(orientation,'col')
-		            col = mod(numPos - 1, colMax) + 1;
-		            row = ceil(numPos / colMax) - 1;
+		            set(figNum,'Position',[pos(1), pos(2) + pos(4) - figureHeight, figureWidth, figureHeight]);
 		        else
-		            row = mod(numPos - 1, rowMax);
-		            col = ceil(numPos / rowMax);
-		        end
-		        left = ScreenSize(1) + marginLeft + hLength * row;
-		        bottom = mainScreenSize(4) - ScreenSize(2) - vLength * col;
-		        set(figNum,'Position',[left, bottom, figure_width, figure_height]);
-		    end        
+			        row = mod(numPos - 1, rowMax);
+			        col = ceil(numPos / rowMax);
+			        if strcmp(orientation,'col')
+			            col = mod(numPos - 1, colMax) + 1;
+			            row = ceil(numPos / colMax) - 1;
+			        else
+			            row = mod(numPos - 1, rowMax);
+			            col = ceil(numPos / rowMax);
+			        end
+			        left = screenSize(1) + marginLeft + hLength * row;
+			        bottom = mainscreenSize(4) - screenSize(2) - vLength * col;
+			        set(figNum,'Position',[left, bottom, figureWidth, figureHeight]);
+			        break
+			    end
+		    end
 		end
 	end
 end
@@ -105,6 +136,11 @@ function args = parseInputs(inArgs)
 					args.orientation = 'col';
 				case 'atend'
 					args.atend = true;
+				case 'disp'
+					if (length(inArgs) - ind) >= 1 && isNumericArg(inArgs{ind+1})
+						args.dispPriority = evalNumericArg(inArgs{ind+1});
+						ind = ind + 1;
+					end
 			end
 		end
 		ind = ind + 1;
