@@ -5,6 +5,7 @@ gridfigure is...
 - A package to let figure windows appear automatically in grid style alignment  
 - A command to batch resize and organize figures in grid style (multidisplay compatible)
 
+gridfigure supports multiscreens. You can specify which screen to show figure windows on.
 Automatic alignment requires some additional settings (see "Automatic Alignment" section)
 
 

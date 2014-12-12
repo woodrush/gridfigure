@@ -1,22 +1,23 @@
 function ret = gfigure(varargin)
-	% gfigure is...
-	% - A package to let figure windows appear automatically in grid style alignment	
+	% GFIGURE is...
+	% - A package to let figure windows appear automatically in grid style alignment
 	% - A command to batch resize and organize figures in grid style
+	% GFIGURE supports multiscreens. You can specify which screen to show figure windows on.
 	% Automatic alignment requires some additional settings (see "Automatic Alignment" section)
     % 
 	% ### Examples:
-	%     gfigure               ->  Align all visible figures in grid style
-	%     gfigure 1:5           ->  Align specified figures in grid style
-	%     gfigure 400 300       ->  Resize figure to 400x300 and align (setting is remembered)
-	%     gfigure disp 2        ->  (-d) Show on second display (setting is remembered)
-	%     gfigure row           ->  (-r) Align row-wise ('col' or '-s' for column-wise. setting is remembered)
-	%     gfigure nofocus       ->  (-n) Don't give focus and only align
-	%     gfigure tail          ->  (-t) Move figures to end
-	%     gfigure size 400 300  ->  (-s) Explicitly specify figure size
+	%     GFIGURE               ->  Align all visible figures in grid style
+	%     GFIGURE 1:5           ->  Align specified figures in grid style
+	%     GFIGURE 400 300       ->  Resize figure to 400x300 and align (setting is remembered)
+	%     GFIGURE disp 2        ->  (-d) Show on second display (setting is remembered)
+	%     GFIGURE row           ->  (-r) Align row-wise ('col' or '-s' for column-wise. setting is remembered)
+	%     GFIGURE nofocus       ->  (-n) Don't give focus and only align
+	%     GFIGURE tail          ->  (-t) Move figures to end
+	%     GFIGURE size 400 300  ->  (-s) Explicitly specify figure size
 	% Composite Calls are possible:
-	%     gfigure 400 300 row 1:5 disp 2
-	%     gfigure 1 400 300 row           ->  Ambiguous call. gfigure guesses min(1,300) is the figure handle
-	%     gfigure('disp',[3 1 2],400,300,[1 3 5 7 9])
+	%     GFIGURE 400 300 row 1:5 disp 2
+	%     GFIGURE 1 400 300 row           ->  Ambiguous call. GFIGURE guesses min(1,300) is the figure handle
+	%     GFIGURE('disp',[3 1 2],400,300,[1 3 5 7 9])
     % 
 	% ### Automatic Alignment
 	% By executing the code below, you can let figure windows automatically appear in grid style without any commands:
