@@ -1,16 +1,24 @@
 gridfigure
 ==========
-gridfigure is...
-
-- A package to let figure windows appear automatically in grid style alignment  
-- A command to batch resize and organize figures in grid style (multidisplay compatible)
-
-gridfigure supports multiscreens. You can specify which screen to show figure windows on.
-Automatic alignment requires some additional settings (see "Automatic Alignment" section)
+Running Gridfigure lets figure windows automatically appear organized in grid style, without any commands.
+Gridfigure also provides a command to batch resize and organize figures in grid style, with full support of multiscreens.
 
 ![gfigure example](./screenshot.png) 
 
-### Examples:
+
+### Automatic Alignment
+After installation, by executing the code below, automatic alignment becomes effective:
+
+    set(0,'defaultfigurecreatefcn',@(varargin) gfigure('tail','nofocus',varargin{1}));
+
+Writing this code in startup.m will improve convenience. (see http://www.mathworks.com/help/matlab/ref/startup.html for details on startup.m)
+
+The above code alters the 'defaultfigurecreatefcn' property of 'figure'. Note that this feature is currently (1.16.2015) undocumented in MATLAB.
+
+
+### Manual alignment:
+Manual alignment is also possible:
+
     gfigure               ->  Align all visible figures in grid style
     gfigure 1:5           ->  Align specified figures in grid style
     gfigure 400 300       ->  Resize figure to 400x300 and align (setting is remembered)
@@ -19,7 +27,8 @@ Automatic alignment requires some additional settings (see "Automatic Alignment"
     gfigure nofocus       ->  (-n) Don't give focus and only align
     gfigure tail          ->  (-t) Move figures to end
     gfigure size 400 300  ->  (-s) Explicitly specify figure size
-Composite Calls are possible:
+
+Composite Calls are also possible:
 
     gfigure 400 300 row 1:5 disp 2
     gfigure 1 400 300 row           ->  Ambiguous call. gfigure guesses min(1,300) is the figure handle
@@ -32,15 +41,6 @@ Composite Calls are possible:
 3. Choose the "Add with Subfolders..." button,
    then choose the gridfigure directory you have added,
    then choose "OK", and then "Save".
-
-
-### Automatic Alignment
-By executing the code below, you can let figure windows automatically appear in grid style without any commands:
-    set(0,'defaultfigurecreatefcn',@(varargin) gfigure('tail','nofocus',varargin{1}));
-By writing this code in startup.m, figrues will appear in grid style on startup of MATLAB.
-(see http://www.mathworks.com/help/matlab/ref/startup.html for details on startup.m)
-The above code alters the 'defaultfigurecreatefcn' property of 'figure'
-so that the 3rd argument is always called on figure window creation (this feature is currently undocumented).
 
 
 ### Changing Default Settings
